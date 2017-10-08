@@ -1,3 +1,16 @@
+'''
+
+Copyright [2017] [Nanomesher limited - www.nanomesher.com]
+
+Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
+
+'''
+
+
 import  RPi.GPIO as GPIO
 import time
 
@@ -12,7 +25,7 @@ GPIO.setup(13, GPIO.IN,pull_up_down=GPIO.PUD_DOWN)
 GPIO.setup(16, GPIO.IN,pull_up_down=GPIO.PUD_DOWN)
 GPIO.setup(5, GPIO.OUT)
 GPIO.setup(26, GPIO.OUT)
-#Toggle for LED2
+
 toggle2 = False
 toggle1 = False
 while True:
@@ -45,11 +58,9 @@ while True:
         print("Button 2 press ")
         if(toggle2 == False):
             GPIO.output(5,GPIO.HIGH)
-            print("H")
             toggle2 = True
         else:
             GPIO.output(5,GPIO.LOW)
-            print("L")
             toggle2 = False	
 
     if (inputValue1 == True):
@@ -57,11 +68,9 @@ while True:
         
         if(toggle1 == False):
             GPIO.output(26,GPIO.HIGH)
-            print("H")
             toggle1 = True
         else:
             GPIO.output(26,GPIO.LOW)
-            print("L")
             toggle1 = False
 
     time.sleep(0.2)

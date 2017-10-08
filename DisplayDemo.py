@@ -2,6 +2,17 @@
 
 # This is a demo to show ip address of eth0 and wlan0 network interace on the ProdBoard OLED Display
 
+'''
+Copyright [2017] [Nanomesher Limited - www.nanomesher.com]
+
+Licensed under the Apache License, Version 2.0 (the "License"); you may not use$
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software distributed$
+'''
+
+
 from __future__ import unicode_literals
 
 from luma.core.interface.serial import i2c
@@ -54,9 +65,6 @@ except:
 
 font1 = make_font("code2000.ttf",12)
 
-print(GetLANIP())
-
-
 try:
 
   if(hasOLED):
@@ -68,8 +76,7 @@ try:
 except:
   pass
 
-time.sleep(10)
-
+raw_input("Showing IP address on OLED display. Press Enter to continue...")
 
 	
 	
