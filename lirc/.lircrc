@@ -1,0 +1,20 @@
+begin
+    prog = irexec
+    button = KEY_UP
+    config = echo "You pressed up"
+    repeat = 0
+end
+
+begin
+  prog = myprogram
+  button = KEY_UP
+  config = LED1
+end
+
+begin
+  prog = myprogram
+  button = KEY_SELECT
+  config = LED2
+end
+
+
