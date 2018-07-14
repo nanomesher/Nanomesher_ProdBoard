@@ -88,7 +88,7 @@ sensorBMP = BMP085.BMP085()
 if ccs.available():
   temp = ccs.calculateTemperature()
   if not ccs.readData():
-    print "CO2: ", ccs.geteCO2(), "ppm, TVOC: ", ccs.getTVOC(), " temp: ", temp
+    print "Initial CO2: ", ccs.geteCO2(), "ppm, TVOC: ", ccs.getTVOC(), " temp: ", temp
 
 
 degrees=0
@@ -108,11 +108,17 @@ while(True):
     if ccs.available():
       temp = ccs.calculateTemperature()
       if not ccs.readData():
-        draw.text((1, 52), "CO2:"+ str(ccs.geteCO2()),font=font1, fill="white")
+        co2 = ccs.geteCO2()
+        tvoc = ccs.getTVOC()
+        draw.text((1, 48), str(co2) + "ppm VOC:" + str(tvoc), font=font1, fill="white")
+
+
+
+
   sleep(1)
   sensor.clear_status()
 
-raw_input("Showing IP address on OLED display. Press Enter to continue...")
+
 
 	
 	
