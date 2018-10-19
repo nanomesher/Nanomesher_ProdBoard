@@ -1,0 +1,11 @@
+[Unit]
+Description=NanoSound Air Monitor Service
+
+[Service]
+ExecStart=/home/pi/Nanomesher_ProdBoard/WeatherExample/PiAirMon.py
+WorkingDirectory=/home/pi/Nanomesher_ProdBoard/WeatherExample/
+StandardOutput=null
+
+[Install]
+WantedBy=multi-user.target
+Alias=nanomesher_piairmon
