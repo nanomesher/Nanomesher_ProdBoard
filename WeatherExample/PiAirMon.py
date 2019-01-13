@@ -31,18 +31,12 @@ import urllib2
 import logging
 
 
-ccs =  Adafruit_CCS811()
-
-while not ccs.available():
-	pass
-temp = ccs.calculateTemperature()
-ccs.tempOffset = temp - 25.0
-
-
 serial = i2c(port=1, address=0x3C)
 
 config = ConfigParser.ConfigParser()
 config.read('AirMonitor.config')
+
+EnableCCS = False
 
 SaveToDB = False
 SaveToDBInt = 60
@@ -65,6 +59,18 @@ handler.setFormatter(formatter)
 
 # add the handlers to the logger
 logger.addHandler(handler)
+
+if(config.get('DEFAULT','CCS811')=='yes'):
+    EnableCCS = True
+    
+
+if(EnableCCS):
+    ccs =  Adafruit_CCS811()
+    while not ccs.available():
+    	pass
+    temp = ccs.calculateTemperature()
+    ccs.tempOffset = temp - 25.0
+
 
 
 if(config.get('DEFAULT','SaveToDatabase')=='yes'):
@@ -153,7 +159,7 @@ while(True):
     draw.text((5, 2), "Nanomesher Air Mon",font=font1, fill="white")
     draw.text((1, 18), temp + "/" + humid,font=font1, fill="white")
     draw.text((1, 36), pressure,font=font1, fill="white")
-    if ccs.available():
+    if (EnableCCS and ccs.available()):
       temp = ccs.calculateTemperature()
       if not ccs.readData():
         co2 = ccs.geteCO2()
@@ -170,13 +176,14 @@ while(True):
       degreesval = {'value': degrees}
       humidityval = {'value': humidity}
       pressureval = {'value': pressure}
-      co2val = {'value': co2}
-      tvocval = {'value': tvoc}
       uploadData(humurl,humidityval)
       uploadData(tempurl,degreesval)
       uploadData(presurl,pressureval)
-      uploadData(co2url,co2val)
-      uploadData(tvocurl, tvocval)
+      if(EnableCCS):
+          co2val = {'value': co2}
+          tvocval = {'value': tvoc}
+          uploadData(co2url,co2val)
+          uploadData(tvocurl, tvocval)
   sensor.clear_status()
  except Exception as e:
   logger.error(e)
