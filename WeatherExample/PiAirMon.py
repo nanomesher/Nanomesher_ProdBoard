@@ -154,11 +154,12 @@ while(True):
   humidity = sensor.read_humidity()
   temp = '{0:0.3f}C'.format(degrees)
   humid = '{0:0.2f} %'.format(humidity)
-  pressure = '{0:0.2f} hPa'.format(sensorBMP.read_pressure()/100.0)  
+  pressure = sensorBMP.read_pressure()/100.0
+  pres = '{0:0.2f} hPa'.format(pressure)  
   with canvas(device) as draw:
     draw.text((5, 2), "Nanomesher Air Mon",font=font1, fill="white")
     draw.text((1, 18), temp + "/" + humid,font=font1, fill="white")
-    draw.text((1, 36), pressure,font=font1, fill="white")
+    draw.text((1, 36), pres,font=font1, fill="white")
     if (EnableCCS and ccs.available()):
       temp = ccs.calculateTemperature()
       if not ccs.readData():
