@@ -2,12 +2,9 @@
 # This is a demo to show ip address of eth0 and wlan0 network interace on the ProdBoard OLED Display
 
 '''
-Copyright [2017] [Nanomesher Limited - www.nanomesher.com]
-
+Copyright [2018] [Nanomesher Limited - www.nanomesher.com]
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use$
-
 http://www.apache.org/licenses/LICENSE-2.0
-
 Unless required by applicable law or agreed to in writing, software distributed$
 '''
 
