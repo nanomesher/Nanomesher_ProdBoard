@@ -25,7 +25,7 @@ import WeatherDataAccess
 import urllib
 import urllib2
 import logging
-
+import traceback
 serial = i2c(port=1, address=0x3C)
 
 config = ConfigParser.ConfigParser()
@@ -131,11 +131,14 @@ def make_font(name, size):
 
 
 try:
-    device = sh1106(serial, rotate=0)
-    # device = ssd1306(serial, rotate=0)
+    if (config.get('DEFAULT', 'Display') == 'sh1106'):
+        device = sh1106(serial, rotate=0)
+    else:
+        device = ssd1306(serial, rotate=0)
 
     hasOLED = True
-except:
+except Exception:
+    traceback.print_exc()
     hasOLED = False
 
 font1 = make_font("DejaVuSansMono.ttf", 10)
