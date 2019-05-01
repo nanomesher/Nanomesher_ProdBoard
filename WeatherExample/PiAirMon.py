@@ -8,7 +8,6 @@ http://www.apache.org/licenses/LICENSE-2.0
 Unless required by applicable law or agreed to in writing, software distributed$
 '''
 
-
 from __future__ import unicode_literals
 from time import sleep
 from luma.core.interface.serial import i2c
@@ -27,13 +26,14 @@ import urllib
 import urllib2
 import logging
 
-
 serial = i2c(port=1, address=0x3C)
 
 config = ConfigParser.ConfigParser()
 config.read('AirMonitor.config')
 
 EnableCCS = False
+EnableBMP = False
+EnableSHT = False
 
 SaveToDB = False
 SaveToDBInt = 60
@@ -57,34 +57,38 @@ handler.setFormatter(formatter)
 # add the handlers to the logger
 logger.addHandler(handler)
 
-if(config.get('DEFAULT','CCS811')=='yes'):
+if (config.get('DEFAULT', 'CCS811') == 'yes'):
     EnableCCS = True
-    
 
-if(EnableCCS):
-    ccs =  Adafruit_CCS811()
+if (config.get('DEFAULT', 'SHT31') == 'yes'):
+    EnableSHT = True
+
+if (config.get('DEFAULT', 'BMP180') == 'yes'):
+    EnableBMP = True
+
+if (EnableCCS):
+    ccs = Adafruit_CCS811()
     while not ccs.available():
-    	pass
+        pass
     temp = ccs.calculateTemperature()
     ccs.tempOffset = temp - 25.0
 
-
-
-if(config.get('DEFAULT','SaveToDatabase')=='yes'):
+if (config.get('DEFAULT', 'SaveToDatabase') == 'yes'):
     SaveToDB = True
-    SaveToDBInt = int(config.get('DEFAULT','SaveToDatabaseIntervalSecond'))
+    SaveToDBInt = int(config.get('DEFAULT', 'SaveToDatabaseIntervalSecond'))
 
-if(config.get('DEFAULT','SendToAIO')=='yes'):
+if (config.get('DEFAULT', 'SendToAIO') == 'yes'):
     SendToAIO = True
-    SendToAIOInt = int(config.get('DEFAULT','SendToAIOIntervalSecond'))
-    AIOKey = config.get('AIO','AIOKey')
-    tempurl = config.get('AIO','Tempurl')
-    humurl = config.get('AIO','Humurl')
-    co2url = config.get('AIO','Co2url')
-    presurl = config.get('AIO','Presurl')
-    tvocurl = config.get('AIO','Tvocurl')
+    SendToAIOInt = int(config.get('DEFAULT', 'SendToAIOIntervalSecond'))
+    AIOKey = config.get('AIO', 'AIOKey')
+    tempurl = config.get('AIO', 'Tempurl')
+    humurl = config.get('AIO', 'Humurl')
+    co2url = config.get('AIO', 'Co2url')
+    presurl = config.get('AIO', 'Presurl')
+    tvocurl = config.get('AIO', 'Tvocurl')
 
-def uploadData(url,data):
+
+def uploadData(url, data):
     dataenc = urllib.urlencode(data)
     req3 = urllib2.Request(url, dataenc)
     req3.add_header('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8')
@@ -93,106 +97,117 @@ def uploadData(url,data):
 
 
 def GetLANIP():
-   try:
-     cmd = "ip addr show eth0 | grep inet  | grep -v inet6 | awk '{print $2}' | cut -d '/' -f 1"
-     p = Popen(cmd, shell=True, stdout=PIPE)
-     output = p.communicate()[0]
-     ip = output[:-1]
-     if(ip ==""):
-	return "-"
-     else:
-        return ip
-   except:
-     return "-"
+    try:
+        cmd = "ip addr show eth0 | grep inet  | grep -v inet6 | awk '{print $2}' | cut -d '/' -f 1"
+        p = Popen(cmd, shell=True, stdout=PIPE)
+        output = p.communicate()[0]
+        ip = output[:-1]
+        if (ip == ""):
+            return "-"
+        else:
+            return ip
+    except:
+        return "-"
+
 
 def GetWLANIP():
-   try:
-     cmd = "ip addr show wlan0 | grep inet  | grep -v inet6 | awk '{print $2}' | cut -d '/' -f 1"
-     p = Popen(cmd, shell=True, stdout=PIPE)
-     output = p.communicate()[0]
-     ip = output[:-1]
-     if(ip ==""):
+    try:
+        cmd = "ip addr show wlan0 | grep inet  | grep -v inet6 | awk '{print $2}' | cut -d '/' -f 1"
+        p = Popen(cmd, shell=True, stdout=PIPE)
+        output = p.communicate()[0]
+        ip = output[:-1]
+        if (ip == ""):
+            return "-"
+        else:
+            return ip
+    except:
         return "-"
-     else:
-        return ip
-   except:
-     return "-"
+
 
 def make_font(name, size):
     font_path = os.path.abspath(os.path.join(
         os.path.dirname(__file__), '../fonts', name))
     return ImageFont.truetype(font_path, size)
 
+
 try:
-	device = sh1106(serial, rotate=0)
-	#device = ssd1306(serial, rotate=0)
-	
-	hasOLED = True
+    device = sh1106(serial, rotate=0)
+    # device = ssd1306(serial, rotate=0)
+
+    hasOLED = True
 except:
-	hasOLED = False
+    hasOLED = False
 
-font1 = make_font("code2000.ttf",12)
+font1 = make_font("DejaVuSansMono.ttf", 10)
 
-sensor = SHT31(address = 0x44)
-sensorBMP = BMP085.BMP085()
-#print 'Temp             = {0:0.3f} deg C'.format(degrees)
-#print 'Humidity         = {0:0.2f} %'.format(humidity)
+if (EnableSHT):
+    sensor = SHT31(address=0x44)
+
+if (EnableBMP):
+    sensorBMP = BMP085.BMP085()
+
+# print 'Temp             = {0:0.3f} deg C'.format(degrees)
+# print 'Humidity         = {0:0.2f} %'.format(humidity)
 
 
-
-degrees=0
-humidity=0
+degrees = 0
+humidity = 0
 logger.info('Nanomesher Pi Air Mon started')
 
-while(True):
- try:
-  sleep(1)
-  degrees = sensor.read_temperature()
-  humidity = sensor.read_humidity()
-  temp = '{0:0.3f}C'.format(degrees)
-  humid = '{0:0.2f} %'.format(humidity)
-  pressure = sensorBMP.read_pressure()/100.0
-  pres = '{0:0.2f} hPa'.format(pressure)  
-  with canvas(device) as draw:
-    draw.text((5, 2), "Nanomesher Air Mon",font=font1, fill="white")
-    draw.text((1, 18), temp + "/" + humid,font=font1, fill="white")
-    draw.text((1, 36), pres,font=font1, fill="white")
-    if (EnableCCS and ccs.available()):
-      temp = ccs.calculateTemperature()
-      if not ccs.readData():
-        co2 = ccs.geteCO2()
-        tvoc = ccs.getTVOC()
-        draw.text((1, 48), str(co2) + "ppm VOC:" + str(tvoc), font=font1, fill="white")
+while (True):
+    try:
+        sleep(1)
+        if (EnableSHT):
+            degrees = sensor.read_temperature()
+            temp = '{0:0.3f}C'.format(degrees)
+            humidity = sensor.read_humidity()
+            humid = '{0:0.2f} %'.format(humidity)
+        else:
+            temp = '-'
+            humid = '-'
 
-    curtime = time.time()
-    if(SaveToDB and ((curtime-LastSaveToDB)>=(SaveToDBInt-1))):
-      LastSaveToDB = curtime
-      WeatherDataAccess.InsertWeatherData(27, 51, 979, 441, 5)
+        if (EnableBMP):
+            pressure = sensorBMP.read_pressure() / 100.0
+            pres = '{0:0.2f} hPa'.format(pressure)
+        else:
+            pres = '-'
 
-    if(SendToAIO and ((curtime-LastSendToAIO)>=(SendToAIOInt-1))):
-      LastSendToAIO = curtime
-      degreesval = {'value': degrees}
-      humidityval = {'value': humidity}
-      pressureval = {'value': pressure}
-      uploadData(humurl,humidityval)
-      uploadData(tempurl,degreesval)
-      uploadData(presurl,pressureval)
-      if(EnableCCS):
-          co2val = {'value': co2}
-          tvocval = {'value': tvoc}
-          uploadData(co2url,co2val)
-          uploadData(tvocurl, tvocval)
-  sensor.clear_status()
- except Exception as e:
-  logger.error(e)
+        with canvas(device) as draw:
+            draw.text((1, 1), "Nanomesher Air Mon", font=font1, fill="white")
+            draw.text((1, 18), temp + "/" + humid, font=font1, fill="white")
+            draw.text((1, 36), pres, font=font1, fill="white")
+            if (EnableCCS and ccs.available()):
+                temp = ccs.calculateTemperature()
+                if not ccs.readData():
+                    co2 = ccs.geteCO2()
+                    tvoc = ccs.getTVOC()
+                    draw.text((1, 48), str(co2) + "ppm VOC:" + str(tvoc), font=font1, fill="white")
 
+            curtime = time.time()
+            if (SaveToDB and ((curtime - LastSaveToDB) >= (SaveToDBInt - 1))):
+                LastSaveToDB = curtime
+                WeatherDataAccess.InsertWeatherData(27, 51, 979, 441, 5)
 
+            if (SendToAIO and ((curtime - LastSendToAIO) >= (SendToAIOInt - 1))):
+                LastSendToAIO = curtime
 
+                if (EnableSHT):
+                    degreesval = {'value': degrees}
+                    humidityval = {'value': humidity}
+                    uploadData(humurl, humidityval)
+                    uploadData(tempurl, degreesval)
 
+                if (EnableBMP):
+                    pressureval = {'value': pressure}
+                    uploadData(presurl, pressureval)
 
+                if (EnableCCS):
+                    co2val = {'value': co2}
+                    tvocval = {'value': tvoc}
+                    uploadData(co2url, co2val)
+                    uploadData(tvocurl, tvocval)
 
-
-
-	
-	
-
+        if (EnableSHT):
+            sensor.clear_status()
+    except Exception as e:
+        logger.error(e)
