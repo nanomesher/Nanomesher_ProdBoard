@@ -153,8 +153,11 @@ if (EnableBMP):
 # print 'Humidity         = {0:0.2f} %'.format(humidity)
 
 
-degrees = 0
-humidity = 0
+degrees = -1
+humidity = -1
+pressure = -1
+co2 = -1
+tvoc = -1
 logger.info('Nanomesher Pi Air Mon started')
 
 while (True):
@@ -189,7 +192,7 @@ while (True):
             curtime = time.time()
             if (SaveToDB and ((curtime - LastSaveToDB) >= (SaveToDBInt - 1))):
                 LastSaveToDB = curtime
-                WeatherDataAccess.InsertWeatherData(27, 51, 979, 441, 5)
+                WeatherDataAccess.InsertWeatherData(degrees, humidity, pressure, co2, tvoc)
 
             if (SendToAIO and ((curtime - LastSendToAIO) >= (SendToAIOInt - 1))):
                 LastSendToAIO = curtime
