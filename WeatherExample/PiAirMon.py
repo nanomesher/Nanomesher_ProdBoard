@@ -165,6 +165,7 @@ while (True):
         sleep(1)
         if (EnableSHT):
             degrees = sensor.read_temperature()
+            degrees = degrees - 4
             temp = '{0:0.3f}C'.format(degrees)
             humidity = sensor.read_humidity()
             humid = '{0:0.2f} %'.format(humidity)
